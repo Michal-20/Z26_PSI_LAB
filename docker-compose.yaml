@@ -10,3 +10,7 @@ services:
     container_name: TCP_server
     build: ./Server
     tty: true
+
+networks:
+  z34_network:
+    external: true
