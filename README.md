@@ -5,4 +5,10 @@
 - **Michał Kaczyński**
 - **Tomasz Zieliński**
 
-**Numer zespołu to Z34**
+**Numer zespołu: Z34**
+
+### Instrukcja
+Aby uruchomić cały program należy w głównym katalogu uruchomić polecenie:
+```bash
+docker compose up --build
+```

@@ -1,15 +1,24 @@
 version: "3.0"
 services:
+  server:
+    container_name: z34_TCP_server
+    image: z34_tcp_server_img:latest
+    build: ./Server
+    tty: true
+    networks:
+      z34_network:
+        aliases:
+          - z34_server
+
   client:
     container_name: z34_TCP_client
+    image: z34_tcp_client_img:latest
     build: ./Client
     tty: true
     depends_on:
       - server
-  server:
-    container_name: z34_TCP_server
-    build: ./Server
-    tty: true
+    networks:
+      - z34_network
 
 networks:
   z34_network:
