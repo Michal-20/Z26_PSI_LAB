@@ -1,0 +1,12 @@
+version: "3.0"
+services:
+  client:
+    container_name: TCP_client
+    build: ./Client
+    tty: true
+    depends_on:
+      - server
+  server:
+    container_name: TCP_server
+    build: ./Server
+    tty: true
