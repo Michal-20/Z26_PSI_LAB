@@ -8,7 +8,7 @@
 **Numer zespołu: Z34**
 
 ### Instrukcja
-Aby uruchomić cały program należy w głównym katalogu uruchomić polecenie:
+Aby uruchomić całe zadania należy skopiować potrzebne pliki: folder Client i Server oraz plik docker-compose.yaml. Następnie z tego samego poziomu uruchomić polecenie:
 ```bash
 docker compose up --build
 ```
