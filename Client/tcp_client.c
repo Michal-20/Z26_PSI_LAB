@@ -9,7 +9,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define DATA "Half a league, half a league . . ."
 #define MAX_TEXT_LEN 64
 
 #define bailout(s) \
@@ -20,13 +19,14 @@
 
 typedef struct Node
 {
-    short small_value;
-    int big_value;
+    uint16_t small_value;
+    uint32_t big_value;
+    uint32_t text_size;
     char text[MAX_TEXT_LEN];
     struct Node *next_value;
 } Node;
 
-Node *create_node(short small_num, int big_num, const char *text)
+Node *create_node(uint16_t small_num, uint32_t big_num, const char *text)
 {
     Node *node = (Node *)malloc(sizeof(Node));
     if (node == NULL)
@@ -38,11 +38,12 @@ Node *create_node(short small_num, int big_num, const char *text)
     node->big_value = big_num;
     strncpy(node->text, text, MAX_TEXT_LEN - 1);
     node->text[MAX_TEXT_LEN - 1] = '\0';
+    node->text_size = strlen(node->text);
     node->next_value = NULL;
     return node;
 }
 
-Node *add_node(Node *head, short small_num, int big_num, const char *text)
+Node *add_node(Node *head, uint16_t small_num, uint32_t big_num, const char *text)
 {
     Node *added_node = create_node(small_num, big_num, text);
     if (added_node == NULL)
@@ -62,17 +63,45 @@ Node *add_node(Node *head, short small_num, int big_num, const char *text)
     return head;
 }
 
-main(int argc, char *argv[])
+void free_space(Node *head)
+{
+    Node *curr = head;
+    while (curr != NULL)
+    {
+        Node *next_node = curr->next_value;
+        free(curr);
+        curr = next_node;
+    }
+}
+
+int main(int argc, char *argv[])
 {
     int sock = 0;
+    int i = 0;
+    ssize_t total_bytes_send = 0;
+    ssize_t bytes_send = 0;
+    ssize_t total_size = 0;
+    Node *head = NULL;
     struct sockaddr_in server;
     struct hostent *hp = NULL;
+    uint16_t curr_small_number;
+    uint32_t curr_big_number;
+    uint16_t curr_len;
+    char data[72];
+
+    const uint16_t small_numbers[] = {123, 6544, 3432, 4325, 6752};
+    const uint32_t big_numbers[] = {34253453, 535345324, 253425345, 43255345, 675253425};
+    const char *texts[] = {"Ala ma kota", "Test 1 2 3", "Lorem ipsum dolor sit amet, consectetur porttitor.", "PSI Z26 lab1", "WEITI"};
+
+    if (argc != 3)
+    {
+        errx(3, "Incorrect number of argument: %d\n", argc);
+    }
 
     // creating list
-    Node *head = create_node(38, 158, "test");
-
-    for (int i = 0; i < 10; i++)
+    for (i = 0; i < 5; i++)
     {
+        head = add_node(head, small_numbers[i], big_numbers[i], texts[i]);
     }
 
     printf("Starting...\n");
@@ -82,29 +111,47 @@ main(int argc, char *argv[])
 
     server.sin_family = AF_INET;
 
-    if (argc == 3)
+    hp = gethostbyname2(argv[1], AF_INET);
+    if (hp == (struct hostent *)0)
     {
-        hp = gethostbyname2(argv[1], AF_INET);
-        if (hp == (struct hostent *)0)
+        errx(2, "%s: unknown host\n", argv[1]);
+    }
+    memcpy((char *)&server.sin_addr, (char *)hp->h_addr, hp->h_length);
+    server.sin_port = htons(atoi(argv[2]));
+
+    printf("Connecting...\n");
+    if (connect(sock, (struct sockaddr *)&server, sizeof server) == -1)
+        bailout("connecting stream socket");
+    printf("Connected.\n");
+
+    Node *curr = head;
+    while (curr != NULL)
+    {
+        curr_small_number = htons(curr->small_value);
+        curr_big_number = htonl(curr->big_value);
+        curr_len = htons(curr->text_size);
+
+        memcpy(data, &curr_small_number, 2);
+        memcpy(data + 2, &curr_big_number, 4);
+        memcpy(data + 6, &curr_len, 2);
+        memcpy(data + 8, &curr->text, curr->text_size);
+        total_size = 8 + curr->text_size;
+
+        total_bytes_send = 0;
+        while (total_bytes_send < total_size)
         {
-            errx(2, "%s: unknown host\n", argv[1]);
+            bytes_send = write(sock, (char *)data + total_bytes_send, total_size - total_bytes_send);
+            if (bytes_send == -1)
+            {
+                free_space(head);
+                close(sock);
+                bailout("writing on stream socket");
+            }
+            total_bytes_send += bytes_send;
         }
-        memcpy((char *)&server.sin_addr, (char *)hp->h_addr, hp->h_length);
-        server.sin_port = htons(atoi(argv[2]));
-
-        printf("Connecting...\n");
-        if (connect(sock, (struct sockaddr *)&server, sizeof server) == -1)
-            bailout("connecting stream socket");
-        printf("Connected.\n");
-
-        if (write(sock, DATA, sizeof DATA) == -1)
-            bailout("writing on stream socket");
-
-        close(sock);
-        exit(0);
+        curr = curr->next_value;
     }
-    else
-    {
-        errx(3, "Incorrect number of argument: %d\n", argc);
-    }
+    free_space(head);
+    close(sock);
+    exit(0);
 }
