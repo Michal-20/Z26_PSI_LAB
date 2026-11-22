@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     uint16_t curr_small_number;
     uint32_t curr_big_number;
     uint16_t curr_len;
-    char data[72];
+    char data[8 + MAX_TEXT_LEN];
 
     const uint16_t small_numbers[] = {123, 6544, 3432, 4325, 6752};
     const uint32_t big_numbers[] = {34253453, 535345324, 253425345, 43255345, 675253425};
