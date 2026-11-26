@@ -8,7 +8,13 @@
 **Numer zespołu: Z34**
 
 ### Zawartość repozytorium
+Całe repozytorium dzielimy na 2 główne foldery: "Zadanie 1" i "Zadanie 2". Jak sama nazwa mówi odnoszą się one do poszczególnych zadań, które są do wykonania w ramach laboratoriów. Poniżej przedstawimy dokładną zawartość katalogów.
+
+#### Zadanie 1
 2 katalogi jeden z plikami klienta (dockerfile + kod w C) oraz drugi z plikami serwera (dockerfile + kod w C). Dodatkowo istnieje plik docker-compose.yaml, który ma za zadanie usprawnić uruchomienie kodu.
+
+#### Zadanie 2
+2 katalogi jeden z plikami klienta (dockerfile + kod w C) oraz drugi z plikami serwera (dockerfile + kod w pythonie). Dodatkowo istnieje plik docker-compose.yaml, który ma za zadanie usprawnić uruchomienie kodu.
 
 ### Instrukcja
 Aby uruchomić całe zadania należy skopiować potrzebne pliki: folder Client i Server oraz plik docker-compose.yaml. Następnie z tego samego poziomu uruchomić polecenie:
