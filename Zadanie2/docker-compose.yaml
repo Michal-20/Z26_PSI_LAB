@@ -1,0 +1,29 @@
+version: "3.0"
+services:
+  server:
+    container_name: z34_udp_server
+    image: z34_udp_server_img:latest
+    build: ./Server
+    tty: true
+    cap_add:
+      - NET_ADMIN
+    networks:
+      z34_network:
+        aliases:
+          - z34_server
+
+  client:
+    container_name: z34_udp_client
+    image: z34_udp_client_img:latest
+    build: ./Client
+    tty: true
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - server
+    networks:
+      - z34_network
+
+networks:
+  z34_network:
+    external: true
